@@ -415,6 +415,9 @@ subroutine read_satwnd(nread,ndata,nodata,infile,obstype,lunout,gstime,twind,sis
         call ufbint(lunin,hdrdat,13,1,iret,hdrtr_v1) 
           ! SWQM doesn't exist for GOES-R/new BUFR/ hence hdrdat(13)=MISSING.
           ! qm=2, instead of using hdrdat(13)(2015-07-16, Genkova)
+        if(hdrdat(9)>=bmiss) then ! some older satwnds use CMCM for compute method
+           call ufbint(lunin,hdrdat(9),1,1,iret,'CMCM')
+        endif
 
         iobsub=0
         itype=-1
