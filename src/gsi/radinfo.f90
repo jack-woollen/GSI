@@ -1253,6 +1253,7 @@ contains
 ! !USES:
 
     use mpimod, only: mype
+    use constants, only: zero,one,r10000
     implicit none
 
     integer(i_kind),optional, intent(in) :: pe_out
@@ -1273,7 +1274,11 @@ contains
           rewind lunout
           do jch=1,jpch_rad
              do i=1,npred
-                varx(i)=varA(i,jch)
+                if (inew_rad(jch) .or. abs(ostats(jch)) .le. tiny(ostats(1))) then
+                   varx(i) = r10000
+                else
+                   varx(i)=varA(i,jch)
+                endif
              end do
              write(lunout,'(I5,1x,A20,1x,I5,e15.7/2(4x,10e15.7/))') jch,nusis(jch),&
                   nuchan(jch),ostats(jch),(varx(ip),ip=1,npred)
