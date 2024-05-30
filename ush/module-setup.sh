@@ -40,13 +40,6 @@ elif [[ $MACHINE_ID = wcoss2 ]]; then
     # We are on WCOSS2
     module reset
 
-elif [[ $MACHINE_ID = cheyenne* ]] ; then
-    # We are on NCAR Cheyenne
-    if ( ! eval module help > /dev/null 2>&1 ) ; then
-        source /glade/u/apps/ch/modulefiles/default/localinit/localinit.sh
-    fi
-    module purge
-
 elif [[ $MACHINE_ID = stampede* ]] ; then
     # We are on TACC Stampede
     if ( ! eval module help > /dev/null 2>&1 ) ; then
@@ -63,10 +56,8 @@ elif [[ $MACHINE_ID = gaea* ]] ; then
         # the module command fails.  Hence we actually have to source
         # /etc/profile here.
         source /etc/profile
-        __ms_source_etc_profile=yes
     fi
-
-    source /lustre/f2/dev/role.epic/contrib/Lmod_init.sh
+    module reset
 
 elif [[ $MACHINE_ID = expanse* ]]; then
     # We are on SDSC Expanse
@@ -81,6 +72,10 @@ elif [[ $MACHINE_ID = discover* ]]; then
     export SPACK_ROOT=/discover/nobackup/mapotts1/spack
     export PATH=$PATH:$SPACK_ROOT/bin
     . $SPACK_ROOT/share/spack/setup-env.sh
+
+elif [[ $MACHINE_ID = noaacloud* ]]; then
+    # We are on NOAA Cloud
+    module purge
 
 else
     echo WARNING: UNKNOWN PLATFORM 1>&2
