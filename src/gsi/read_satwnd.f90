@@ -349,20 +349,20 @@ subroutine read_satwnd(nread,ndata,nodata,infile,obstype,lunout,gstime,twind,sis
         endif
             
         call ufbint(lunin,hdrdat,13,1,iret,hdrtr_v1) 
+        if(hdrdat(9)>=10.d10) call ufbint(lunin,hdrdat(9),1,1,iret,'CMCM')
           ! SWQM doesn't exist for GOES-R/new BUFR/ hence hdrdat(13)=MISSING.
           ! qm=2, instead of using hdrdat(13)(2015-07-16, Genkova)
-        if(hdrdat(9)>=bmiss) then ! some older satwnds use CMCM for compute method
-           call ufbint(lunin,hdrdat(9),1,1,iret,'CMCM')
-        endif
 
         isaid=nint(hdrdat(1))
         ihdr9=nint(hdrdat(9))
+        if(ihdr9<1.or.ihdr9>7) cycle loop_report 
 
         itype   = sattab(ysub,isaid,ihdr9,1)
         istype  = sattab(ysub,isaid,ihdr9,2)
 
         if (istype == -1) cycle loop_report ! unassigned itypes
         if (itype  == -1) write(6,*) 'type mismatch', itype,istype
+        if (itype  == -1) cycle loop_report ! unassigned itypes    `
 
         istab(nmsg) = istype 
 
@@ -468,7 +468,7 @@ subroutine read_satwnd(nread,ndata,nodata,infile,obstype,lunout,gstime,twind,sis
      save_all=.false.
      if(pmot /= 2 .and. pmot /= 0) save_all=.true.
 
-     ! Open and read the file once for each satwnd type   
+     ! Open and read the file again for each satwnd type   
      call closbf(lunin)
      open(lunin,file=trim(infile),form='unformatted')
      call openbf(lunin,'IN',lunin)
@@ -516,6 +516,9 @@ subroutine read_satwnd(nread,ndata,nodata,infile,obstype,lunout,gstime,twind,sis
               call ufbint(lunin,obsdat,4,1,iret,obstr_v1)
            endif
 
+           ! test for BUFR version using CMCM for wind computation method
+           if(hdrdat(9)>=10.d10) call ufbint(lunin,hdrdat(9),1,1,iret,'CMCM')
+
            ! reject data with missing pressure or wind
            ppb=obsdat(2)
            if(ppb>rmiss .or.  hdrdat(3)>rmiss .or. obsdat(4)>rmiss) cycle loop_readsb
@@ -556,6 +559,7 @@ subroutine read_satwnd(nread,ndata,nodata,infile,obstype,lunout,gstime,twind,sis
            isaid=nint(hdrdat(01))
            ihdr9=nint(hdrdat(09))
            write(stationid,'(i3.3)') isaid  
+           if(ihdr9<1.or.ihdr9>7) cycle loop_readsb
 
            ! counter for satwnd types
            !if(itype>=240.and.itype<=279) icnt(itype)=icnt(itype)+1             
